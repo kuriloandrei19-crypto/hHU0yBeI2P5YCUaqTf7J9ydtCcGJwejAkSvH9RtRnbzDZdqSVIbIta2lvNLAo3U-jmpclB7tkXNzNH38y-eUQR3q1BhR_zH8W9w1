@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VICE CITY // Rockstar Store Merch Tracker</title>
+
+  <!-- Google Fonts: Bebas Neue (акцентные заголовки) и Montserrat (UI интерфейс) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ==========================================================================
+       CSS VARIABLES & THEME (VICE CITY / GTA VI AESTHETIC)
+       ========================================================================== */
+    :root {
+      --bg-dark: #0b0719;
+      --bg-night-grad: radial-gradient(circle at 15% 15%, #2a0845 0%, #160d2e 40%, #0b0719 90%);
+      --glass-bg: rgba(25, 16, 52, 0.78);
+      --glass-border: rgba(255, 42, 133, 0.22);
+      --glass-border-hover: rgba(255, 123, 84, 0.6);
+
+      --neon-pink: #ff2a85;
+      --neon-orange: #ff7b54;
+      --neon-cyan: #00f0ff;
+      --neon-gold: #ffd166;
+      --neon-green: #10b981;
+      --neon-red: #ef4444;
+
+      --text-main: #f9fafb;
+      --text-muted: #a5a2bb;
+      --text-dim: #6d688c;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg-dark);
+      background-image: var(--bg-night-grad);
+      background-attachment: fixed;
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Фоновые неоновые световые пятна (Ambient Glow) */
+    .ambient-glow-1 {
+      position: fixed;
+      top: -120px;
+      right: -80px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(255, 42, 133, 0.18) 0%, transparent 70%);
+      filter: blur(80px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .ambient-glow-2 {
+      position: fixed;
+      bottom: -150px;
+      left: -100px;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.14) 0%, transparent 70%);
+      filter: blur(90px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ==========================================================================
+       HEADER & HUD STATS
+       ========================================================================== */
+    header {
+      margin-bottom: 36px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 28px;
+    }
+
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo-wrapper {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tagline {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+      margin-bottom: 2px;
+    }
+
+    .main-title {
+      font-family: 'Bebas Neue', cursive;
+      font-size: clamp(2.4rem, 5vw, 4.2rem);
+      letter-spacing: 2px;
+      line-height: 1;
+      background: linear-gradient(100deg, var(--neon-pink) 10%, var(--neon-orange) 50%, var(--neon-gold) 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 10px 25px rgba(255, 42, 133, 0.3);
+    }
+
+    /* HUD Stats Cards */
+    .hud-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .stat-pill {
+      background: rgba(22, 13, 46, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    }
+
+    .stat-pill .label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .stat-pill .value {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1.6rem;
+      line-height: 1;
+      color: var(--neon-gold);
+    }
+
+    /* ==========================================================================
+       CONTROL BAR (FILTERS & ACTIONS)
+       ========================================================================== */
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      background: rgba(18, 11, 38, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 12px 18px;
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(12px);
+      margin-bottom: 32px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .filter-btn:hover {
+      color: #fff;
+      border-color: var(--neon-cyan);
+    }
+
+    .filter-btn.active {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.3);
+    }
+
+    .btn-reset {
+      background: transparent;
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .btn-reset:hover {
+      color: var(--neon-red);
+      border-color: var(--neon-red);
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    /* ==========================================================================
+       PRODUCT GRID & CARDS (GLASSMORPHISM + NEON GLOW)
+       ========================================================================== */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 28px;
+    }
+
+    @media (min-width: 1200px) {
+      .product-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .product-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      transition: var(--transition);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .product-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--glass-border-hover);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 28px rgba(255, 42, 133, 0.3), 0 0 12px rgba(255, 123, 84, 0.2);
+    }
+
+    /* Верхняя плашка статуса */
+    .card-top-bar {
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(11, 7, 25, 0.4);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .item-id {
+      font-size: 0.72rem;
+      font-family: 'Bebas Neue', cursive;
+      letter-spacing: 1.5px;
+      color: var(--text-dim);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid transparent;
+    }
+
+    .status-badge.out_of_stock {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+    }
+
+    .status-badge.in_stock {
+      background: rgba(16, 185, 129, 0.18);
+      border-color: rgba(16, 185, 129, 0.6);
+      color: #6ee7b7;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .status-badge.purchased {
+      background: rgba(255, 209, 102, 0.18);
+      border-color: rgba(255, 209, 102, 0.6);
+      color: #ffd166;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* ПОДЛОЖКА ДЛЯ ФОТО (Светлый студийный контрастный фон для хрома) */
+    .image-container {
+      position: relative;
+      margin: 16px;
+      border-radius: var(--radius-md);
+      background: radial-gradient(circle at center, #ffffff 0%, #e2e8f0 70%, #cbd5e1 100%);
+      padding: 16px;
+      height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .product-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: transform 0.4s ease;
+      filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.18));
+    }
+
+    .image-container:hover .product-img {
+      transform: scale(1.08);
+    }
+
+    .zoom-hint {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(11, 7, 25, 0.7);
+      backdrop-filter: blur(6px);
+      color: #fff;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .image-container:hover .zoom-hint {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Информация о товаре */
+    .card-body {
+      padding: 0 18px 18px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .title-price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .product-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.35;
+      color: #fff;
+    }
+
+    .product-price {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1.55rem;
+      letter-spacing: 0.5px;
+      color: var(--neon-gold);
+      background: rgba(255, 209, 102, 0.1);
+      padding: 3px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 209, 102, 0.3);
+      white-space: nowrap;
+    }
+
+    .product-desc {
+      font-size: 0.81rem;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      line-height: 1.45;
+      min-height: 48px;
+    }
+
+    /* Селектор статуса (Segmented Switcher) */
+    .status-switch-group {
+      display: flex;
+      background: rgba(11, 7, 25, 0.65);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .status-opt-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 7px 4px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .status-opt-btn:hover {
+      color: var(--text-main);
+    }
+
+    .status-opt-btn.active[data-val="out_of_stock"] {
+      background: rgba(239, 68, 68, 0.25);
+      color: #fca5a5;
+      font-weight: 700;
+    }
+
+    .status-opt-btn.active[data-val="in_stock"] {
+      background: rgba(16, 185, 129, 0.25);
+      color: #6ee7b7;
+      font-weight: 700;
+    }
+
+    .status-opt-btn.active[data-val="purchased"] {
+      background: rgba(255, 209, 102, 0.25);
+      color: #ffd166;
+      font-weight: 700;
+    }
+
+    /* Блок последней проверки и заметки */
+    .tracking-meta {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      margin-bottom: 16px;
+    }
+
+    .check-time-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .last-check-text strong {
+      color: var(--neon-cyan);
+    }
+
+    .btn-check-now {
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--neon-cyan);
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-check-now:hover {
+      background: var(--neon-cyan);
+      color: #0b0719;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    }
+
+    .note-input {
+      width: 100%;
+      background: rgba(11, 7, 25, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 0.75rem;
+      color: var(--text-main);
+      font-family: inherit;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .note-input:focus {
+      border-color: var(--neon-pink);
+      box-shadow: 0 0 8px rgba(255, 42, 133, 0.3);
+    }
+
+    .note-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    /* Кнопки действий в карточке */
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .btn-store {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, rgba(255, 42, 133, 0.85), rgba(255, 123, 84, 0.85));
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      transition: var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 14px rgba(255, 42, 133, 0.25);
+    }
+
+    .btn-store:hover {
+      background: linear-gradient(135deg, var(--neon-pink), var(--neon-orange));
+      box-shadow: 0 6px 18px rgba(255, 42, 133, 0.45);
+      transform: translateY(-2px);
+    }
+
+    .btn-copy {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      width: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-copy:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--neon-cyan);
+    }
+
+    .btn-copy svg,
+    .btn-store svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    /* ==========================================================================
+       LIGHTBOX (MODAL VIEW)
+       ========================================================================== */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 7, 25, 0.88);
+      backdrop-filter: blur(16px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .lightbox.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .lightbox-card {
+      background: radial-gradient(circle at center, #ffffff 0%, #e2e8f0 70%, #cbd5e1 100%);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      max-width: 640px;
+      width: 100%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(255, 42, 133, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.6);
+      transform: scale(0.92);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .lightbox.active .lightbox-card {
+      transform: scale(1);
+    }
+
+    .lightbox-img {
+      max-width: 100%;
+      max-height: 58vh;
+      object-fit: contain;
+      filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.25));
+    }
+
+    .lightbox-title {
+      color: #0b0719;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-align: center;
+      margin-top: 18px;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: -16px;
+      right: -16px;
+      background: var(--neon-pink);
+      color: #fff;
+      border: 2px solid #fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+      transition: var(--transition);
+    }
+
+    .lightbox-close:hover {
+      transform: scale(1.1) rotate(90deg);
+      background: var(--neon-orange);
+    }
+
+    /* ==========================================================================
+       TOAST NOTIFICATION
+       ========================================================================== */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: rgba(22, 13, 46, 0.94);
+      border: 1px solid var(--neon-cyan);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.3);
+      backdrop-filter: blur(12px);
+      padding: 14px 20px;
+      border-radius: var(--radius-md);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1100;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28), opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--neon-cyan);
+    }
+
+    /* ==========================================================================
+       FOOTER
+       ========================================================================== */
+    footer {
+      margin-top: 60px;
+      text-align: center;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+
+    footer span {
+      color: var(--neon-pink);
+    }
+
+    /* Responsive Tweaks */
+    @media (max-width: 768px) {
+      .header-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .hud-stats {
+        width: 100%;
+      }
+      .stat-pill {
+        flex: 1;
+      }
+      .controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .filter-tabs {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Фоновые неоновые пятна -->
+  <div class="ambient-glow-1"></div>
+  <div class="ambient-glow-2"></div>
+
+  <div class="container">
+    <!-- ==========================================
+         HEADER
+         ========================================== -->
+    <header>
+      <div class="header-top">
+        <div class="logo-wrapper">
+          <div class="tagline">ROCKSTAR STORE // INVENTORY RADAR</div>
+          <h1 class="main-title">VICE CITY MERCH TRACKER</h1>
+        </div>
+
+        <div class="hud-stats">
+          <div class="stat-pill">
+            <div>
+              <div class="label">Всего товаров</div>
+              <div class="value" id="hud-total-count">4</div>
+            </div>
+          </div>
+          <div class="stat-pill">
+            <div>
+              <div class="label">Сумма комплекта</div>
+              <div class="value" id="hud-total-price">84,96 $</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ==========================================
+         CONTROLS / FILTERS BAR
+         ========================================== -->
+    <div class="controls-bar">
+      <div class="filter-tabs">
+        <button class="filter-btn active" data-filter="all">Все (4)</button>
+        <button class="filter-btn" data-filter="out_of_stock">Жду / Нет на складе (<span id="count-out">0</span>)</button>
+        <button class="filter-btn" data-filter="in_stock">В наличии (<span id="count-in">0</span>)</button>
+        <button class="filter-btn" data-filter="purchased">Куплено (<span id="count-purchased">0</span>)</button>
+      </div>
+
+      <button class="btn-reset" id="btn-reset-data" title="Сбросить все сохранённые статусы и заметки">
+        <svg style="width: 14px; height: 14px; fill: currentColor;" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+        Сбросить все отметки
+      </button>
+    </div>
+
+    <!-- ==========================================
+         PRODUCTS GRID
+         ========================================== -->
+    <div class="product-grid" id="product-grid">
+      <!-- Карточки генерируются динамически через JS -->
+    </div>
+
+    <!-- ==========================================
+         FOOTER
+         ========================================== -->
+    <footer>
+      GTA VI / VICE CITY MERCH DASHBOARD &bull; Сделано для быстрого личного мониторинга Rockstar Store &bull; <span>★</span>
+    </footer>
+  </div>
+
+  <!-- ==========================================
+       MODAL LIGHTBOX
+       ========================================== -->
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-card">
+      <button class="lightbox-close" id="lightbox-close" title="Закрыть (ESC)">
+        <svg style="width: 18px; height: 18px; fill: currentColor;" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+      <img src="" alt="" class="lightbox-img" id="lightbox-img" />
+      <div class="lightbox-title" id="lightbox-title"></div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       TOAST NOTIFICATION
+       ========================================== -->
+  <div class="toast" id="toast">
+    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+    <span id="toast-text">Ссылка скопирована в буфер!</span>
+  </div>
+
+  <!-- ==========================================
+       VANILLA JS APPLICATION
+       ========================================== -->
+  <script>
+    /* Данные товаров */
+    const PRODUCTS = [
+      {
+        id: 'zippo',
+        sku: 'GTA-VI-ZIPPO',
+        name: 'Зажигалка Zippo® Grand Theft Auto VI – Vice City',
+        price: 39.99,
+        image: 'zippo.png',
+        url: 'https://store.rockstargames.com/ru/merchandise/buy-grand-theft-auto-vi-vice-city-zippo-lighter',
+        alt: 'Хромированная зажигалка Zippo GTA VI Vice City с логотипом Rockstar',
+        desc: 'Перезаправляемая хромированная зажигалка Zippo® с лазерной гравировкой классического логотипа Vice City и логотипа Rockstar.'
+      },
+      {
+        id: 'money-clip',
+        sku: 'GTA-VI-MONEYCLIP',
+        name: 'Зажим для денег Grand Theft Auto VI – Vice City',
+        price: 24.99,
+        image: 'money-clip.png',
+        url: 'https://store.rockstargames.com/ru/merchandise/buy-grand-theft-auto-vi-vice-city-money-clip',
+        alt: 'Хромированный зажим для денег GTA VI Vice City с тиснением логотипа',
+        desc: 'Двусторонний хромированный зажим для денег (20 × 50 мм) со слепым тиснением: логотип Vice City и логотип VI с пальмами.'
+      },
+      {
+        id: 'gta6-keychain',
+        sku: 'GTA-VI-KEYCHAIN',
+        name: 'Брелок Grand Theft Auto VI',
+        price: 14.99,
+        image: 'gta6-keychain.png',
+        url: 'https://store.rockstargames.com/ru/merchandise/buy-grand-theft-auto-vi-keychain',
+        alt: 'Хромированный брелок GTA VI с логотипом VI и пальмами',
+        desc: 'Хромированный металлический брелок (2,3 × 2,5 см) с лазерной гравировкой логотипов Rockstar Games и VI с пальмами.'
+      },
+      {
+        id: 'pogo-keychain',
+        sku: 'GTA-V-POGO-KEYCHAIN',
+        name: 'Брелок «Космо-обезьяна Pogo» (Pogo Space Monkey)',
+        price: 4.99,
+        image: 'pogo-keychain.png',
+        url: 'https://store.rockstargames.com/ru/merchandise/buy-pogo-space-monkey-keychain',
+        alt: 'Брелок Космо-обезьяна Pogo Space Monkey Keychain с объемной головой',
+        desc: 'Брелок со стальной цепочкой и объемной резиновой мини-маской «Космо-обезьяна Pogo» с логотипом GTA V на основании.'
+      }
+    ];
+
+    const STORAGE_KEY = 'vc_merch_tracker_store_v1';
+
+    // Состояние хранилища
+    let trackerState = {};
+
+    // Загрузка состояния из LocalStorage
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          trackerState = JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error('Ошибка загрузки localStorage', e);
+      }
+
+      // Инициализируем отсутствующие ключи
+      PRODUCTS.forEach(p => {
+        if (!trackerState[p.id]) {
+          trackerState[p.id] = {
+            status: 'out_of_stock',
+            lastChecked: 'Не проверялось',
+            note: ''
+          };
+        }
+      });
+    }
+
+    // Сохранение состояния в LocalStorage
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(trackerState));
+      } catch (e) {
+        console.error('Ошибка сохранения localStorage', e);
+      }
+      updateCounts();
+    }
+
+    // Текстовые метки статусов
+    const STATUS_LABELS = {
+      out_of_stock: 'Нет на складе',
+      in_stock: 'В наличии',
+      purchased: 'Куплено'
+    };
+
+    // Текущий фильтр
+    let currentFilter = 'all';
+
+    // Рендер карточек
+    function renderCards() {
+      const grid = document.getElementById('product-grid');
+      grid.innerHTML = '';
+
+      PRODUCTS.forEach(product => {
+        const state = trackerState[product.id];
+
+        // Фильтрация
+        if (currentFilter !== 'all' && state.status !== currentFilter) {
+          return;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.dataset.id = product.id;
+
+        card.innerHTML = `
+          <div class="card-top-bar">
+            <span class="item-id">${product.sku}</span>
+            <div class="status-badge ${state.status}">
+              <span class="status-dot"></span>
+              <span class="status-text">${STATUS_LABELS[state.status]}</span>
+            </div>
+          </div>
+
+          <!-- СВЕТЛАЯ СТУДИЙНАЯ ПОДЛОЖКА ДЛЯ ХРОМА -->
+          <div class="image-container" onclick="openLightbox('${product.image}', '${product.name.replace(/'/g, "\\'")}')">
+            <img class="product-img" src="${product.image}" alt="${product.alt}" loading="lazy" />
+            <div class="zoom-hint">
+              <svg style="width:12px;height:12px;fill:currentColor;" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+              Увеличить
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="title-price-row">
+              <h2 class="product-title">${product.name}</h2>
+              <div class="product-price">${product.price.toFixed(2).replace('.', ',')} $</div>
+            </div>
+
+            <p class="product-desc">${product.desc}</p>
+
+            <!-- Селектор статуса -->
+            <div class="status-switch-group">
+              <button class="status-opt-btn ${state.status === 'out_of_stock' ? 'active' : ''}" data-val="out_of_stock" onclick="setStatus('${product.id}', 'out_of_stock')">Нет на складе</button>
+              <button class="status-opt-btn ${state.status === 'in_stock' ? 'active' : ''}" data-val="in_stock" onclick="setStatus('${product.id}', 'in_stock')">В наличии</button>
+              <button class="status-opt-btn ${state.status === 'purchased' ? 'active' : ''}" data-val="purchased" onclick="setStatus('${product.id}', 'purchased')">Куплено</button>
+            </div>
+
+            <!-- Проверка и заметки -->
+            <div class="tracking-meta">
+              <div class="check-time-row">
+                <span class="last-check-text">Проверка: <strong id="check-time-${product.id}">${state.lastChecked}</strong></span>
+                <button class="btn-check-now" onclick="markCheckedNow('${product.id}')">Проверить сейчас</button>
+              </div>
+              <input type="text" class="note-input" placeholder="Личная заметка (напр., цена со скидкой...)" value="${escapeHtml(state.note)}" oninput="updateNote('${product.id}', this.value)" />
+            </div>
+
+            <!-- Действия -->
+            <div class="card-actions">
+              <a href="${product.url}" target="_blank" rel="noopener noreferrer" class="btn-store">
+                <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+                В Rockstar Store
+              </a>
+              <button class="btn-copy" title="Скопировать ссылку" onclick="copyProductLink('${product.url}')">
+                <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+              </button>
+            </div>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    // Безопасный вывод текста
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#039;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Смена статуса
+    function setStatus(id, newStatus) {
+      trackerState[id].status = newStatus;
+      saveState();
+      renderCards();
+    }
+
+    // Отметка текущей даты и времени проверки
+    function markCheckedNow(id) {
+      const now = new Date();
+      const formatted = now.toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      trackerState[id].lastChecked = formatted;
+      saveState();
+
+      const timeLabel = document.getElementById(`check-time-${id}`);
+      if (timeLabel) {
+        timeLabel.textContent = formatted;
+      }
+      showToast('Товар отмечен проверенным сейчас!');
+    }
+
+    // Автосохранение заметки
+    function updateNote(id, noteText) {
+      trackerState[id].note = noteText;
+      saveState();
+    }
+
+    // Копирование ссылки
+    function copyProductLink(url) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+          showToast('Ссылка скопирована в буфер!');
+        }).catch(() => fallbackCopy(url));
+      } else {
+        fallbackCopy(url);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const tempInput = document.createElement('input');
+      tempInput.value = text;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+      showToast('Ссылка скопирована!');
+    }
+
+    // Всплывающее Toast-уведомление
+    let toastTimeout;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastText = document.getElementById('toast-text');
+      toastText.textContent = message;
+      toast.classList.add('show');
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2600);
+    }
+
+    // Обновление счетчиков в фильтрах
+    function updateCounts() {
+      let outCount = 0;
+      let inCount = 0;
+      let purchasedCount = 0;
+
+      PRODUCTS.forEach(p => {
+        const s = trackerState[p.id]?.status;
+        if (s === 'out_of_stock') outCount++;
+        else if (s === 'in_stock') inCount++;
+        else if (s === 'purchased') purchasedCount++;
+      });
+
+      document.getElementById('count-out').textContent = outCount;
+      document.getElementById('count-in').textContent = inCount;
+      document.getElementById('count-purchased').textContent = purchasedCount;
+    }
+
+    // Модальное окно Lightbox
+    function openLightbox(src, title) {
+      const lightbox = document.getElementById('lightbox');
+      const img = document.getElementById('lightbox-img');
+      const caption = document.getElementById('lightbox-title');
+
+      img.src = src;
+      img.alt = title;
+      caption.textContent = title;
+      lightbox.classList.add('active');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+    }
+
+    // Слушатели для Lightbox
+    document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+    document.getElementById('lightbox').addEventListener('click', (e) => {
+      if (e.target.id === 'lightbox') closeLightbox();
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+
+    // Фильтрация товаров
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderCards();
+      });
+    });
+
+    // Сброс отметок
+    document.getElementById('btn-reset-data').addEventListener('click', () => {
+      if (confirm('Вы уверены, что хотите сбросить все ваши статусы и заметки?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        loadState();
+        saveState();
+        renderCards();
+        showToast('Все отметки успешно сброшены');
+      }
+    });
+
+    // Инициализация при старте
+    document.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      updateCounts();
+      renderCards();
+    });
+  </script>
+</body>
+</html>
